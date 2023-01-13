@@ -72,7 +72,7 @@
   <div class="row content">
     
     <div class="col-sm-9">
-      <div class="well">
+      <div class="well" style="overflow-x:auto;">
         <h1>MongoDB <span class="color_h1">Dashboard</span></h1>
                     <hr>
                         <p class="intro">This shows all the MongoDB bad design practices.</p>
@@ -90,11 +90,10 @@
             }
 }
 
-        // The javascript function which invokes the HTTP endpoint
         async function getClusterInfo()
         {
                 var clusters = await getClusters();
-                let html = `
+                let html =  `
                     <h1>MongoDB <span class="color_h1">Dashboard</span></h1>
                     <hr>
                         <p class="intro">This shows all the MongoDB bad design practices.</p>
@@ -110,25 +109,25 @@
                                         <th>Rule</th>
                                     </tr>
                                 `;
-                clusters.forEach(element => {
+                for await (const element of clusters) {
                     let htmlSegment = ``;
-                    element.ruleViolation.forEach(item=>{
-                        htmlSubSegment = `
+                    for await (const item of element.violations){
+                        htmlSubSegment =   `
                                             <tr>
-                                                <td>${element._id}</td>
-                                                <td>${item.namespace}</td>
+                                                <td>${element._id.cluster}</td>
+                                                <td>${element._id.namespace}</td>
                                                 <td>${item.field}</td>
                                                 <td>${item.rule}</td>
                                             </tr>`;
-                        htmlSegment +=htmlSubSegment; 
-                    })
-                    htmlSegment = htmlSegment + `</table>
-                            </div>
-                        </div>
-                    <hr>`;
-                    html += htmlSegment;
-                });
-            let container = document.querySelector('.well');
+                        htmlSegment  = htmlSegment + htmlSubSegment; 
+                    };
+                    html = await html + htmlSegment;
+                };
+                html += `</table></div></div><hr>`
+            
+            
+            let container =  document.querySelector('.well');
+            console.log(html);
             container.innerHTML = html;
         }
         getClusterInfo();
